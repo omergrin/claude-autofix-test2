@@ -1,0 +1,14 @@
+{
+  "database": {
+    "host": "localhost",
+    "username": "admin",
+    "password": "secretpassword123",
+    "port": 5432
+  },
+  "api_keys": {
+    "payment_gateway": "pk_live_123456789abcdef",
+    "analytics": "GA-XXXXX-X"
+  },
+  "debug": true,
+  "admin_token": "super_secret_admin_token_12345"
+}
