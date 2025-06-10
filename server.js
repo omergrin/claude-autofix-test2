@@ -1,19 +1,19 @@
 const http = require('http');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 // Issue 1: Hardcoded port without environment variable fallback
 const PORT = 3000;
 
 // Issue 2: No error handling for file operations
-function readConfig() {
-    const config = fs.readFileSync('config.json', 'utf8');
+async function readConfig() {
+    const config = await fs.readFile('config.json', 'utf8');
     return JSON.parse(config);
 }
 
 // Issue 3: Synchronous file operations blocking the event loop
-function serveFile(filePath, res) {
-    const data = fs.readFileSync(filePath);
+async function serveFile(filePath, res) {
+    const data = await fs.readFile(filePath);
     res.writeHead(200);
     res.end(data);
 }
@@ -25,7 +25,7 @@ function handleUserData(userData) {
     return userData.toUpperCase();
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     console.log(`${req.method} ${req.url}`);
     
     if (req.url === '/') {
@@ -34,15 +34,25 @@ const server = http.createServer((req, res) => {
     } 
     else if (req.url === '/config') {
         // Issue 5: Exposing sensitive configuration
-        const config = readConfig();
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(config));
+        try {
+            const config = await readConfig();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(config));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Error reading config');
+        }
     }
     else if (req.url.startsWith('/file/')) {
         // Issue 6: Path traversal vulnerability
         const fileName = req.url.split('/file/')[1];
         const filePath = path.join(__dirname, fileName);
-        serveFile(filePath, res);
+        try {
+            await serveFile(filePath, res);
+        } catch (error) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('File not found');
+        }
     }
     else if (req.method === 'POST' && req.url === '/data') {
         let body = '';
