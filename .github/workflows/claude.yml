@@ -29,9 +29,32 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup HUD config
+        run: |
+          mkdir -p ~/.hud
+          cat > ~/.hud/config.json << 'EOF'
+          {
+            "baseUrl": "https://api-dog.hudx.io",
+            "accessToken": "${{ secrets.HUD_ACCESS_TOKEN }}",
+            "logEndpoint": "https://oga35jc3lgfpcjsyq7ejkkwd2a0pwwok.lambda-url.eu-central-1.on.aws/",
+            "ideToolsPath": "${{ github.workspace }}/hud-ide-tools"
+          }
+          EOF
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mcp_config: |
+            {
+              "mcpServers": {
+                "hud": {
+                  "command": "${{ github.workspace }}/mcp",
+                  "args": [
+                    "start"
+                  ]
+                }
+              }
+            }
 
