@@ -61,14 +61,6 @@ jobs:
             "ideToolsPath": "${{ github.workspace }}/hud-ide-tools"
           }
           EOF
-          
-          # Make MCP executable and test it
-          chmod +x "${{ github.workspace }}/mcp"
-          echo "Testing MCP executable..."
-          "${{ github.workspace }}/mcp" --help || echo "MCP help command failed"
-          echo "MCP file info:"
-          ls -la "${{ github.workspace }}/mcp"
-          file "${{ github.workspace }}/mcp"
 
       - name: Run Claude Code
         id: claude
