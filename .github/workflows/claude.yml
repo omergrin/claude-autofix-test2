@@ -29,6 +29,27 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Cache binaries
+        id: cache-binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./mcp
+            ./hud-ide-tools
+          key: binaries-${{ runner.os }}-v1.0.0  # Update version when binaries change
+
+      - name: Download binaries
+        if: steps.cache-binaries.outputs.cache-hit != 'true'
+        run: |
+          # Download mcp binary from GitHub releases
+          # Download mcp binary
+          curl -L -o mcp https://cdn.hud.io/claude-action/mcp-linux-x64
+          chmod +x mcp
+
+          # Download hud-ide-tools binary
+          curl -L -o hud-ide-tools https://cdn.hud.io/claude-action/hud-ide-tools-linux-x64
+          chmod +x hud-ide-tools
+
       - name: Setup HUD config and MCP
         run: |
           mkdir -p ~/.hud
