@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Setup HUD config
+      - name: Setup HUD config and MCP
         run: |
           mkdir -p ~/.hud
           cat > ~/.hud/config.json << 'EOF'
@@ -40,10 +40,18 @@ jobs:
             "ideToolsPath": "${{ github.workspace }}/hud-ide-tools"
           }
           EOF
+          
+          # Make MCP executable and test it
+          chmod +x "${{ github.workspace }}/mcp"
+          echo "Testing MCP executable..."
+          "${{ github.workspace }}/mcp" --help || echo "MCP help command failed"
+          echo "MCP file info:"
+          ls -la "${{ github.workspace }}/mcp"
+          file "${{ github.workspace }}/mcp"
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v0.0.18
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_tools: "Bash(npm install),Bash(npm run test),Edit,Replace,NotebookEditCell,mcp__hud__hud-endpoints-runtime-summary,mcp__hud__hud-endpoint-runtime-details,mcp__hud__hud-function-runtime-details,mcp__hud__functions_runtime_summary"
